@@ -139,7 +139,10 @@ Plot::~Plot()
 
 void Plot::start()
 {
-    d_clock.start();                //启动用于计时的系统时钟
+    //为定时器提供更高精度的clock
+    d_clock.start();
+
+    //启动定时器，设置定时器事件产生的间隔为10mS
     d_timerId = startTimer( 10 );
 }
 

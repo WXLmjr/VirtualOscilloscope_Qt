@@ -25,7 +25,7 @@ public Q_SLOTS:
 protected:
     virtual void showEvent( QShowEvent * );         //显示事件
     virtual void resizeEvent( QResizeEvent * );     //重定义大小事件
-    virtual void timerEvent( QTimerEvent * );       //定时器事件
+    virtual void timerEvent( QTimerEvent * );       //定时器事件，覆盖QObject类的timerEvent()函数
 
 private:
     void updateCurve();         //更新曲线

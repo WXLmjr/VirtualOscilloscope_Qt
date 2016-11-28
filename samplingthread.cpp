@@ -34,7 +34,7 @@ double SamplingThread::amplitude() const
     return d_amplitude;
 }
 
-//elapsed代表随着时间流逝，x轴的值。
+//elapsed代表时间的流逝，x轴即时间轴。
 void SamplingThread::sample( double elapsed )
 {
     if ( d_frequency > 0.0 )
@@ -52,15 +52,20 @@ double SamplingThread::value( double timeStamp ) const
 {
     const double period = 1.0 / d_frequency;
 
-    /* 产生正弦波形的代码 */
-    const double x = ::fmod( timeStamp, period );   //fmod() 用来对浮点数进行取模（求余）
+    /*
+     * 产生正弦波形的代码
+     * fmod() 用来对浮点数进行取模（求余）
+     */
+    const double x = ::fmod( timeStamp, period );
     const double v = d_amplitude * qFastSin( x / period * 2 * M_PI );
+    return v;
+}
 
-    /* 产生正切函数波形的代码 */
+/* 产生正切函数波形的代码 */
 //    const double x = ::fmod( timeStamp, period );   //fmod() 用来对浮点数进行取模（求余）
 //    const double v = (qFastSin( x / period * 2 * M_PI )) / (qFastCos( x / period * 2 * M_PI ));
 
-    /* 产生三角波的代码 */
+/* 产生三角波的代码 */
 //    const double x = ::fmod( timeStamp, period );   //fmod() 用来对浮点数进行取模（求余）
 //    double v = 0;
 //    if(x<(period/2.0)) {
@@ -69,9 +74,6 @@ double SamplingThread::value( double timeStamp ) const
 //        v = d_amplitude * (-2.0*x/period + 2) - d_amplitude/2.0;
 //    }
 
-    /* 产生锯齿波的代码 */
+/* 产生锯齿波的代码 */
 //    const double x = ::fmod( timeStamp, period );   //fmod() 用来对浮点数进行取模（求余）
 //    const double v = d_amplitude * x/period - d_amplitude/2.0;
-
-    return v;
-}

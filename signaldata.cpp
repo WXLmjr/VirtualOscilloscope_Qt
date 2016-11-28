@@ -103,7 +103,7 @@ void SignalData::append( const QPointF &sample )//将pendingValues添加到value
 //        for ( int i = 0; i < numValues; i++ )
 //            d_data->append( pendingValues[i] );  //将pendingValues添加到values
 
-//        d_data->pendingValues.clear();          //清除挂起值数组
+//        d_data->pendingValues.clear();           //清除挂起值数组
 
         d_data->append(sample);
 
@@ -114,7 +114,7 @@ void SignalData::append( const QPointF &sample )//将pendingValues添加到value
     d_data->mutex.unlock();
 }
 
-/* 当一屏数据显示完成，需要重头显示的时需要清楚上一屏幕的旧数据     */
+/* 当一屏数据显示完成，需要重头显示的时需要清除上一屏幕的旧数据     */
 /* 在函数void Plot::incrementInterval()中调用                 */
 void SignalData::clearStaleValues( double limit ) //清除values中的旧值
 {
@@ -129,12 +129,13 @@ void SignalData::clearStaleValues( double limit ) //清除values中的旧值
     int index;
     for ( index = values.size() - 1; index >= 0; index-- )
     {
+        //X轴的值一直在增大，当一屏显示完成以后，小于这一屏最右边X坐标的数据将被清除。
         if ( values[index].x() < limit )
             break;
     }
 
-    if ( index > 0 )
-        d_data->append( values[index++] );
+//    if ( index > 0 )
+//        d_data->append( values[index++] );
 
     while ( index < values.size() - 1 )
         d_data->append( values[index++] );
@@ -142,7 +143,7 @@ void SignalData::clearStaleValues( double limit ) //清除values中的旧值
     d_data->lock.unlock();
 }
 
-//实例化一个SignalData并返回其引用
+//实例化一个SignalData对象并返回其引用
 SignalData &SignalData::instance()
 {
     //定义一个静态局部类对象，生命周期为整个程序
