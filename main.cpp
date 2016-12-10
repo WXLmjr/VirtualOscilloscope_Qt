@@ -32,7 +32,7 @@ int main( int argc, char **argv )
     samplingThread.start();         //启动采样线程
     window.start();                 //开始window
 
-    bool ok = app.exec();           //执行app
+    bool ok = app.exec();           //进入主事件循环，直道退出程序，结束循环，才能执行下面的程序
 
     samplingThread.stop();          //停止采样线程
     samplingThread.wait( 1000 );

@@ -157,12 +157,14 @@ void Plot::replot()
     data->values().lock();
 
     QwtPlot::replot();
+
+    /* d_paintedPoints变量记录了，已经绘制的容器中点的个数 */
     d_paintedPoints = data->size();
 
     data->values().unlock();
 }
 
-/* 设置区间长度并重绘 */
+/* 设置显示区间的长度，单位：秒，并重绘 */
 void Plot::setIntervalLength( double interval )
 {
     if ( interval > 0.0 && interval != d_interval.width() )
@@ -187,8 +189,10 @@ void Plot::updateCurve()
     const int numPoints = data->size();
     if ( numPoints > d_paintedPoints )
     {
+        /* WA_PaintOnScreen属性，指示窗口部件想要直接画在屏幕上 */
         const bool doClip = !canvas()->testAttribute( Qt::WA_PaintOnScreen );
-        if ( doClip )
+
+        if ( doClip ) //如果窗口部件不是要直接画在屏幕上
         {
             /*
                 Depending on the platform setting a clip might be an important
@@ -215,25 +219,35 @@ void Plot::updateCurve()
          * 调用增量式绘图函数，这样可以更高效
          */
         d_directPainter->drawSeries( d_curve, d_paintedPoints - 1, numPoints - 1 );
+
+        /*
+         * 变量d_paintedPoints记录了，上次容器中的元素数量，
+         * 再次绘制时，从上次的最后一个元素+1的地方开始增量式绘制
+         */
         d_paintedPoints = numPoints;
     }
 
     data->values().unlock();
 }
 
+
 /* 增加区间，并重绘：当一屏数据显示完成，需要重头显示的时候调用 */
 void Plot::incrementInterval()
 {
+    /* 设置区间 */
     d_interval = QwtInterval( d_interval.maxValue(),
         d_interval.maxValue() + d_interval.width() );
 
     CurveData *data = static_cast<CurveData *>( d_curve->data() );
+
+    /* 清除x轴坐标小于区间最小值的点，这种做法，可能会清除一部分还没有绘制的点 */
     data->values().clearStaleValues( d_interval.minValue() );
 
     // To avoid, that the grid is jumping, we disable
     // the autocalculation of the ticks and shift them
     // manually instead.
 
+    /* 设置x轴刻度 */
     QwtScaleDiv scaleDiv = axisScaleDiv( QwtPlot::xBottom );
     scaleDiv.setInterval( d_interval );
 
@@ -246,6 +260,7 @@ void Plot::incrementInterval()
     }
     setAxisScaleDiv( QwtPlot::xBottom, scaleDiv );
 
+    /* 设置十字交叉线的位置 */
     d_origin->setValue( d_interval.minValue() + d_interval.width() / 2.0, 0.0 );
 
     d_paintedPoints = 0;
@@ -258,7 +273,7 @@ void Plot::timerEvent( QTimerEvent *event ) //定时器事件
     {
         updateCurve();                      //更新曲线
 
-        const double elapsed = d_clock.elapsed() / 1000.0;
+        const double elapsed = d_clock.elapsed() / 1000.0;  //Plot对象启动定时器以来，经过了多少秒
         if ( elapsed > d_interval.maxValue() )  //如果已经过去的时间大于区间的最大值，则更新区间
             incrementInterval();                 //增加区间
 
@@ -268,13 +283,13 @@ void Plot::timerEvent( QTimerEvent *event ) //定时器事件
     QwtPlot::timerEvent( event );
 }
 
-void Plot::resizeEvent( QResizeEvent *event )     //重定义尺寸事件
+void Plot::resizeEvent( QResizeEvent *event )     //改变尺寸事件
 {
-    d_directPainter->reset();
+    d_directPainter->reset();                   //窗口尺寸发生改变，复位直接画家对象
     QwtPlot::resizeEvent( event );
 }
 
-void Plot::showEvent( QShowEvent * )
+void Plot::showEvent( QShowEvent * )             //显示事件
 {
     replot();
 }

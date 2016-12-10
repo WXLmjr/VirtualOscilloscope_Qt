@@ -26,6 +26,7 @@ public:
     void setValue( double value );
     double value() const;
 
+//    bool eventFilter(QObject *object, QEvent *event);
 Q_SIGNALS:
     double valueChanged( double );
 
